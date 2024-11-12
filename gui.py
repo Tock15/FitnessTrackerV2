@@ -6,20 +6,39 @@ class MainPage(ctk.CTk):
         super().__init__(*args,**kwargs)
         self.geometry("1000x600")
         self.title("Exercise Tracker")
-        self.grid_columnconfigure(0, weight=1)
-        self.title_label = ctk.CTkLabel(self, text="Fitness Tracker", font=("Arial", 36))
+        ############### Main Frame ################
+        self.mainFrame = ctk.CTkFrame(self)
+        self.mainFrame.pack(fill="both", expand=True)
+        self.mainFrame.grid_columnconfigure(0, weight=1)
+        # Title
+        self.title_label = ctk.CTkLabel(self.mainFrame, text="Fitness Tracker", font=("Arial", 36))
         self.title_label.grid(row=0, column=0, pady=100)
-
-        self.bmi_button = ctk.CTkButton(self, text="BMI Calculator")
+        # BMI Button
+        self.bmi_button = ctk.CTkButton(self.mainFrame, text="BMI Calculator")
         self.bmi_button.grid(row=1, column=0, pady=10)
-
-        self.tracker_button = ctk.CTkButton(self, text="Tracker",command=self.open_tracker)
+        # Tracker Button
+        self.tracker_button = ctk.CTkButton(self.mainFrame, text="Tracker",command=self.show_tracker)
         self.tracker_button.grid(row=2, column=0, pady=10)
-
-        self.stats_button = ctk.CTkButton(self, text="Stats")
+        # Stats Button
+        self.stats_button = ctk.CTkButton(self.mainFrame, text="Stats")
         self.stats_button.grid(row=3, column=0, pady=10)
 
-        self.toplevel_window = None
+        self.toplevel_window = None ## use this later for top level window
+
+        ############### Traacker Frame ################
+
+        self.trackerFrame = ctk.CTkFrame(self)
+        self.trackerFrame.grid_columnconfigure(0, weight=1)
+        self.trackerFrame.pack_forget()  # Initially hide the tracker frame
+        # Title for Tracker Frame
+        self.tracker_title_label = ctk.CTkLabel(self.trackerFrame, text="Workout Log", font=("Arial", 36))
+        self.tracker_title_label.grid(row=0, column=0, pady=20)
+        # Back Button
+        self.back_button = ctk.CTkButton(self.trackerFrame, text="Back", command=self.show_main)
+        self.back_button.grid(row=1, column=0, sticky="w", padx=20, pady=10)
+        # Log New Workout Button
+        self.log_new_workout_button = ctk.CTkButton(self.trackerFrame, text="Log New Workout", command=self.open_tracker)
+        self.log_new_workout_button.grid(row=1, column=0, sticky="e", padx=20, pady=10)
 
 
         self.mainloop()
@@ -29,6 +48,12 @@ class MainPage(ctk.CTk):
             self.toplevel_window.grab_set()  
         else:
             self.toplevel_window.focus() 
+    def show_tracker(self):
+        self.mainFrame.pack_forget()
+        self.trackerFrame.pack(fill="both", expand=True)
+    def show_main(self):
+        self.trackerFrame.pack_forget()
+        self.mainFrame.pack(fill="both", expand=True)
         
 class TrackerWindow(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):

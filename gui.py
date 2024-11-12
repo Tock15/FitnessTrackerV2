@@ -1,12 +1,15 @@
 import customtkinter as ctk
 import pickle
 
+ctk.set_default_color_theme("theme.json")
 class MainPage(ctk.CTk):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.geometry("1000x600")
         self.title("Exercise Tracker")
+
         ############### Main Frame ################
+
         self.mainFrame = ctk.CTkFrame(self)
         self.mainFrame.pack(fill="both", expand=True)
         self.mainFrame.grid_columnconfigure(0, weight=1)
@@ -25,11 +28,12 @@ class MainPage(ctk.CTk):
 
         self.toplevel_window = None ## use this later for top level window
 
-        ############### Traacker Frame ################
+        ############### Tracker Frame ################
 
         self.trackerFrame = ctk.CTkFrame(self)
         self.trackerFrame.grid_columnconfigure(0, weight=1)
-        self.trackerFrame.pack_forget()  # Initially hide the tracker frame
+        self.trackerFrame.grid_rowconfigure(2, weight=1) 
+        self.trackerFrame.pack_forget() 
         # Title for Tracker Frame
         self.tracker_title_label = ctk.CTkLabel(self.trackerFrame, text="Workout Log", font=("Arial", 36))
         self.tracker_title_label.grid(row=0, column=0, pady=20)
@@ -37,12 +41,19 @@ class MainPage(ctk.CTk):
         self.back_button = ctk.CTkButton(self.trackerFrame, text="Back", command=self.show_main)
         self.back_button.grid(row=1, column=0, sticky="w", padx=20, pady=10)
         # Log New Workout Button
-        self.log_new_workout_button = ctk.CTkButton(self.trackerFrame, text="Log New Workout", command=self.open_tracker)
+        self.log_new_workout_button = ctk.CTkButton(self.trackerFrame, text="Log New Workout", command=self.open_new_workout)
         self.log_new_workout_button.grid(row=1, column=0, sticky="e", padx=20, pady=10)
-
+        # Exercise Log Table
+        self.log_table_frame = ctk.CTkScrollableFrame(self.trackerFrame, fg_color="lightgrey")
+        self.log_table_frame.grid(row=2, column=0, pady=20, padx=20, sticky="nsew")
+        # Ensure the log_table_frame expands
+        self.log_table_frame.grid_columnconfigure(0, weight=1)
+        # Add content to log_table_frame
+        self.log_table = ctk.CTkLabel(self.log_table_frame, text="No logs yet", font=("Arial", 14), text_color="grey")
+        self.log_table.grid(row=0, column=0, pady=10)
 
         self.mainloop()
-    def open_tracker(self):
+    def open_new_workout(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = TrackerWindow(self) 
             self.toplevel_window.grab_set()  

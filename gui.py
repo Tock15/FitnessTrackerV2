@@ -1,9 +1,13 @@
 import customtkinter as ctk
+from tkcalendar import DateEntry
 import pickle
+from exercise import Weightlifting, Cardio, Tracker
+
 
 ctk.set_default_color_theme("theme.json")
 class MainPage(ctk.CTk):
     def __init__(self,*args,**kwargs):
+        self.tracker = Tracker()
         super().__init__(*args,**kwargs)
         self.geometry("1000x600")
         self.title("Exercise Tracker")
@@ -74,30 +78,25 @@ class TrackerWindow(ctk.CTkToplevel):
         self.label = ctk.CTkLabel(self, text="Workout Log", font=("Arial", 24), pady=10)
         self.label.grid(row=0, column=0, columnspan=2)
 
-        # Date picker (placeholder)
+        # Date picker
         self.date_label = ctk.CTkLabel(self, text="Date:")
         self.date_label.grid(row=1, column=0, sticky="w", padx=10, pady=5)
-        self.date_entry = ctk.CTkEntry(self, placeholder_text="Select Date")
+        self.date_entry = DateEntry(self, width=20,font=("Arial,13"), background='E0E6E9', foreground='white', borderwidth=2)
         self.date_entry.grid(row=1, column=1, padx=10, pady=5)
-
         # Exercise selection
         self.exercise_label = ctk.CTkLabel(self, text="Exercise:")
         self.exercise_label.grid(row=2, column=0, sticky="w", padx=10, pady=5)
-        
         # Dropdown for saved exercises
-        self.exercise_dropdown = ctk.CTkComboBox(self, values=["Bench Press", "Squat", "Deadlift"])  # Add exercise options here
+        self.exercise_dropdown = ctk.CTkComboBox(self, values=["Bench Press"], state="readonly")  # Add exercise options here
         self.exercise_dropdown.grid(row=2, column=1, padx=10, pady=5)
-
         # Entry for new exercise
         self.new_exercise_entry = ctk.CTkEntry(self, placeholder_text="Or enter new")
         self.new_exercise_entry.grid(row=3, column=1, padx=10, pady=5)
-
         # Weight, Sets, Reps inputs
         self.weight_label = ctk.CTkLabel(self, text="Weight (kg):")
         self.weight_label.grid(row=4, column=0, sticky="w", padx=10, pady=5)
         self.weight_entry = ctk.CTkEntry(self)
         self.weight_entry.grid(row=4, column=1, padx=10, pady=5)
-
         self.sets_label = ctk.CTkLabel(self, text="Sets:")
         self.sets_label.grid(row=5, column=0, sticky="w", padx=10, pady=5)
         self.sets_entry = ctk.CTkEntry(self)
@@ -111,13 +110,39 @@ class TrackerWindow(ctk.CTkToplevel):
         # Log and History buttons
         self.log_button = ctk.CTkButton(self, text="Log", command=self.log_workout)
         self.log_button.grid(row=7, column=0, pady=10)
-
         self.history_button = ctk.CTkButton(self, text="Workout History", command=self.view_history)
         self.history_button.grid(row=7, column=1, pady=10)
 
     def log_workout(self):
-        # Placeholder function for logging the workout
-        print("Workout logged!")
+        # Collect data from entries
+        date = self.date_entry.get()
+        exercise = self.exercise_dropdown.get() if self.new_exercise_entry.get() == "" else self.new_exercise_entry.get()
+        weight = self.weight_entry.get()
+        sets = self.sets_entry.get()
+        reps = self.reps_entry.get()
+
+        # Add new exercise to dropdown if it's not empty and not already in the list
+        if self.new_exercise_entry.get() != "" and self.new_exercise_entry.get() not in self.exercise_dropdown.cget("values"):
+            new_exercise = self.new_exercise_entry.get()
+            current_values = list(self.exercise_dropdown.cget("values"))
+            current_values.append(new_exercise)
+            self.exercise_dropdown.configure(values=current_values)
+
+        # Clear all entries after logging the workout
+        self.exercise_dropdown.set('')
+        self.new_exercise_entry.delete(0, 'end')
+        self.weight_entry.delete(0, 'end')
+        self.sets_entry.delete(0, 'end')
+        self.reps_entry.delete(0, 'end')
+
+        # Create a dictionary to store the workout data
+        temp = Weightlifting(date, exercise, weight, sets, reps)
+        self.master.tracker.add_exercise(temp)
+        print(self.master.tracker.logDict) # TODO remove this later when done testing
+
+        # Save the workout data to a file (append mode)
+        # with open("workout_log.pkl", "ab") as f:
+        #     pickle.dump(workout_data, f)
 
     def view_history(self):
         # Placeholder function for viewing workout history

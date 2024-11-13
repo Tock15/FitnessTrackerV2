@@ -1,6 +1,7 @@
 import abc
 class Exercise(metaclass = abc.ABCMeta):
-    def __init__(self,name):
+    def __init__(self,date,name):
+        self.date = date
         self.name = name
     @abc.abstractmethod
     def get_data(self):
@@ -8,20 +9,20 @@ class Exercise(metaclass = abc.ABCMeta):
     
 
 class Weightlifting(Exercise):
-    def __init__(self,name,weight,reps,sets):
-        super().__init__(name)
+    def __init__(self,date,name,weight,sets,reps):
+        super().__init__(date,name)
         self.weight = weight
-        self.reps = reps
         self.sets = sets
+        self.reps = reps
     def get_data(self):
-        return [self.name,self.weight,self.reps,self.sets]
+        return [self.date,self.weight,self.sets,self.reps]
 
 class Cardio(Exercise):
-    def __init__(self,name,time):
-        super().__init__(name)
+    def __init__(self,date,name,time):
+        super().__init__(date,name)
         self.time = time
     def get_data(self):
-        return [self.name,self.time]
+        return [self.date,self.name,self.time]
     
 class Tracker:
     def __init__(self):

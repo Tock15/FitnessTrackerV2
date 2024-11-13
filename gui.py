@@ -163,7 +163,7 @@ class TrackerWindow(ctk.CTkToplevel):
         self.finish_button.grid(row=6, column=1, pady=10)
 
     def log_workout(self):
-        # Collect data from entries
+        # Get data from entries
         date = self.date_entry.get()
         exercise = self.exercise_dropdown.get() if self.new_exercise_entry.get() == "" else self.new_exercise_entry.get()
         weight = self.weight_entry.get()

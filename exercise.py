@@ -39,16 +39,3 @@ class Tracker:
             result += f"{name}: {data}\n"
         return result
 
-if __name__ == "__main__":
-    tracker = Tracker()
-
-    weightlifting = Weightlifting("Bench Press", 100, 10, 3)
-    tracker.add_exercise(weightlifting)
-    cardio = Cardio("Running", 30)
-    tracker.add_exercise(cardio)
-    weightlifting2 = Weightlifting("Squat", 150, 8, 4)
-    tracker.add_exercise(weightlifting2)
-    cardio2 = Cardio("Cycling", 45)
-    tracker.add_exercise(cardio2)
-    
-    print(tracker)

@@ -7,7 +7,8 @@ from exercise import Weightlifting, Cardio, Tracker
 ctk.set_default_color_theme("theme.json")
 class MainPage(ctk.CTk):
     def __init__(self,*args,**kwargs):
-        self.tracker = Tracker()
+        self.tracker=None
+        self.data = []
         super().__init__(*args,**kwargs)
         self.geometry("1000x600")
         self.title("Exercise Tracker")
@@ -131,11 +132,11 @@ class TrackerWindow(ctk.CTkToplevel):
         self.reps_label.grid(row=5, column=0, sticky="w", padx=10, pady=5)
         self.reps_entry = ctk.CTkEntry(self.logger_frame)
         self.reps_entry.grid(row=5, column=1, padx=10, pady=5)
-        # Log and History buttons
+        # Log and Finish buttons
         self.log_button = ctk.CTkButton(self.logger_frame, text="Log", command=self.log_workout)
         self.log_button.grid(row=6, column=0, pady=10)
-        self.history_button = ctk.CTkButton(self.logger_frame, text="Workout History", command=self.view_history)
-        self.history_button.grid(row=6, column=1, pady=10)
+        self.finish_button = ctk.CTkButton(self.logger_frame, text="Complete", command=self.finish_logging)
+        self.finish_button.grid(row=6, column=1, pady=10)
 
     def log_workout(self):
         # Collect data from entries
@@ -146,7 +147,7 @@ class TrackerWindow(ctk.CTkToplevel):
         reps = self.reps_entry.get()
 
         # Add new exercise to dropdown if it's not empty and not already in the list
-        if self.new_exercise_entry.get() != "" and self.new_exercise_entry.get() not in self.exercise_dropdown.cget("values"):
+        if self.new_exercise_entry.get() != "" and self.new_exercise_entry.get() not in list(self.exercise_dropdown.cget("values")):
             new_exercise = self.new_exercise_entry.get()
             current_values = list(self.exercise_dropdown.cget("values"))
             current_values.append(new_exercise)
@@ -167,10 +168,15 @@ class TrackerWindow(ctk.CTkToplevel):
         #     pickle.dump(workout_data, f)
     def show_logger_frame(self):
         name = self.workout_name_entry.get()
+        date = self.date_entry.get()
         self.label.configure(text=name)
+        self.master.tracker = Tracker(name, date)  # Assign to self.master.tracker
         self.info_frame.pack_forget()
         self.logger_frame.pack(fill="both", expand=True)
-    def view_history(self):
-        # Placeholder function for viewing workout history
-        print("View workout history")
+    def finish_logging(self):
+        self.master.data.append(self.master.tracker)
+        self.master.tracker = None
+        print("Length: ", len(self.master.data))
+        self.destroy()
+        print("Finish")
 MainPage()

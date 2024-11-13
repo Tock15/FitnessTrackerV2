@@ -52,7 +52,7 @@ class MainPage(ctk.CTk):
         self.log_table_frame = ctk.CTkScrollableFrame(self.trackerFrame, fg_color="lightgrey")
         self.log_table_frame.grid(row=2, column=0, pady=20, padx=20, sticky="nsew")
         # Ensure the log_table_frame expands
-        self.log_table_frame.grid_columnconfigure(1, weight=1)  # Ensure the name_label is centered
+        self.log_table_frame.grid_columnconfigure(1, weight=1)  
         self.mainloop()
     def update_log_table(self):
         for widget in self.log_table_frame.winfo_children():
@@ -186,6 +186,9 @@ class TrackerWindow(ctk.CTkToplevel):
         temp = Weightlifting(date, exercise, weight, sets, reps)
         self.master.tracker.add_exercise(temp)
         print(self.master.tracker.logDict) # TODO remove this later when done testing
+        self.confirmation_label = ctk.CTkLabel(self.logger_frame, text="Logged successfully!", text_color="green")
+        self.confirmation_label.grid(row=7, column=0, columnspan=2, pady=10)
+        self.after(2000, self.confirmation_label.destroy)
 
         # Save the workout data to a file (append mode)
         # with open("workout_log.pkl", "ab") as f:
@@ -194,14 +197,12 @@ class TrackerWindow(ctk.CTkToplevel):
         name = self.workout_name_entry.get()
         date = self.date_entry.get()
         self.label.configure(text=name)
-        self.master.tracker = Tracker(name, date)  # Assign to self.master.tracker
+        self.master.tracker = Tracker(name, date)  # IMPORTANT - create a new tracker object here
         self.info_frame.pack_forget()
         self.logger_frame.pack(fill="both", expand=True)
     def finish_logging(self):
         self.master.data.append(self.master.tracker)
         self.master.tracker = None
-        print("Length: ", len(self.master.data))
         self.master.update_log_table()
         self.destroy()
-        print("Finish")
 MainPage()

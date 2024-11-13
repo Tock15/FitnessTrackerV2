@@ -27,6 +27,7 @@ class Cardio(Exercise):
 class Tracker:
     def __init__(self,name,date):
         self.name = name
+        self.date = date
         self.exercises = []
         self.logDict = {}
     def add_exercise(self,exercise):

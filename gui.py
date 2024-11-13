@@ -52,12 +52,35 @@ class MainPage(ctk.CTk):
         self.log_table_frame = ctk.CTkScrollableFrame(self.trackerFrame, fg_color="lightgrey")
         self.log_table_frame.grid(row=2, column=0, pady=20, padx=20, sticky="nsew")
         # Ensure the log_table_frame expands
-        self.log_table_frame.grid_columnconfigure(0, weight=1)
-        # Add content to log_table_frame
-        self.log_table = ctk.CTkLabel(self.log_table_frame, text="No logs yet", font=("Arial", 14), text_color="grey")
-        self.log_table.grid(row=0, column=0, pady=10)
-
+        self.log_table_frame.grid_columnconfigure(1, weight=1)  # Ensure the name_label is centered
         self.mainloop()
+    def update_log_table(self):
+        for widget in self.log_table_frame.winfo_children():
+            widget.destroy()
+        if len(self.data) > 0:
+            for i, tracker in enumerate(self.data):
+                date_label = ctk.CTkLabel(self.log_table_frame, text=tracker.date, font=("Arial", 14),text_color="black")
+                date_label.grid(row=i, column=0, padx=10, pady=5, sticky="w")
+
+                name_label = ctk.CTkLabel(self.log_table_frame, text=tracker.name, font=("Arial", 14), text_color="black")
+                name_label.grid(row=i, column=1, padx=10, pady=5, sticky="ew") 
+
+                view_button = ctk.CTkButton(self.log_table_frame, text="View", command=lambda t=tracker: self.view_workout(t))
+                view_button.grid(row=i, column=2, padx=10, pady=5, sticky="e")
+        self.log_table_frame.update_idletasks()
+
+    def view_workout(self, tracker):
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            self.toplevel_window = ctk.CTkToplevel(self)
+            self.toplevel_window.geometry("400x300")
+            self.toplevel_window.title(tracker.name)
+            self.toplevel_window.grab_set()  
+
+            for i, exercise in enumerate(tracker.exercises):
+                exercise_label = ctk.CTkLabel(self.toplevel_window, text=f"{exercise.name}: {exercise.sets} sets x {exercise.reps} reps", font=("Arial", 14))
+                exercise_label.pack(pady=5)
+        else:
+            self.toplevel_window.focus()
     def open_new_workout(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = TrackerWindow(self) 
@@ -114,7 +137,8 @@ class TrackerWindow(ctk.CTkToplevel):
         self.exercise_label = ctk.CTkLabel(self.logger_frame, text="Exercise:")
         self.exercise_label.grid(row=1, column=0, sticky="w", padx=10, pady=5)
         # Dropdown for saved exercises
-        self.exercise_dropdown = ctk.CTkComboBox(self.logger_frame, values=["Bench Press"], state="readonly")  # Add exercise options here
+        self.exercise_dropdown = ctk.CTkComboBox(self.logger_frame, values=["Bench Press"], state="readonly")
+        self.exercise_dropdown.set("Select exercise")  ## TODO Error handle when user does not select an exercise
         self.exercise_dropdown.grid(row=1, column=1, padx=10, pady=5)
         # Entry for new exercise
         self.new_exercise_entry = ctk.CTkEntry(self.logger_frame, placeholder_text="Or enter new")
@@ -177,6 +201,7 @@ class TrackerWindow(ctk.CTkToplevel):
         self.master.data.append(self.master.tracker)
         self.master.tracker = None
         print("Length: ", len(self.master.data))
+        self.master.update_log_table()
         self.destroy()
         print("Finish")
 MainPage()

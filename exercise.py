@@ -17,7 +17,7 @@ class Weightlifting(Exercise):
     def get_data(self):
         return [self.date,self.weight,self.sets,self.reps]
     def get_intensity(self):
-        return self.weight * self.sets * self.reps
+        return float(self.weight) * float(self.sets) * float(self.reps)
 
 class Cardio(Exercise):
     def __init__(self,date,name,time):

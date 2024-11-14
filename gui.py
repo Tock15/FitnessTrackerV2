@@ -5,6 +5,8 @@ from exercise import Weightlifting, Cardio, Tracker
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import datetime
 
 
 ctk.set_default_color_theme("theme.json")
@@ -23,6 +25,8 @@ class MainPage(ctk.CTk):
         super().__init__(*args,**kwargs)
         self.geometry("1000x600")
         self.title("Exercise Tracker")
+        self.from_date = None
+        self.to_date= None
         
 
         ############### Main Frame ################
@@ -102,18 +106,23 @@ class MainPage(ctk.CTk):
         self.selected_exercise = None
         # Title for Stats Frame
         self.stats_title_label = ctk.CTkLabel(self.stats_frame, text="Stats", font=("Arial", 36))
-        self.stats_title_label.grid(row=0, column=0,columnspan=2, pady=20)
+        self.stats_title_label.grid(row=0, column=0, columnspan=2, pady=20)
         # Back Button
         self.stats_back_button = ctk.CTkButton(self.stats_frame, text="Back", command=self.show_main)
         self.stats_back_button.grid(row=1, column=0, sticky="w", padx=20, pady=10)
         # Select exercise button
         self.select_exercise_button = ctk.CTkButton(self.stats_frame, text="Select Exercise", command=self.select_exercise)
         self.select_exercise_button.grid(row=1, column=1, padx=20, pady=10)
-        # Frame for graph
-        self.graph_frame = ctk.CTkFrame(self.stats_frame)
-        self.graph_frame.grid(row=2, column=0, columnspan=2, pady=20)
 
-        #self.fig, self.ax = plt.subplots()
+        # Frame for graph
+        self.graph_frame = ctk.CTkFrame(self.stats_frame,fg_color="lightgrey")
+        self.graph_frame.grid(row=5, column=0, columnspan=2, pady=20,sticky="ns")
+
+        self.plot_button = ctk.CTkButton(self.stats_frame, text="Plot Graph", command=self.plot_graph)
+        self.plot_button.grid(row=6, column=0, columnspan=2, pady=10)
+        # Selected Exercise Label
+        self.selected_exercise_label = ctk.CTkLabel(self.stats_frame, text=f"Selected Exercise: {self.selected_exercise}", font=("Arial", 14))
+        self.selected_exercise_label.grid(row=4, column=0, columnspan=2, pady=10)
         
         self.mainloop()
     def select_exercise(self):
@@ -121,6 +130,7 @@ class MainPage(ctk.CTk):
             self.toplevel_window = ctk.CTkToplevel(self)
             self.toplevel_window.geometry("400x300")
             self.toplevel_window.title("Select Exercise")
+            self.toplevel_window.columnconfigure(0, weight=1)
             self.toplevel_window.grab_set()
             if os.path.exists("comboboxlist.pkl"): 
                 with open("comboboxlist.pkl", "rb") as f:
@@ -129,17 +139,33 @@ class MainPage(ctk.CTk):
             else:
                 self.ex_list = []
 
-            # Example content for the top level window
-            self.exercise_listbox = ctk.CTkComboBox(self.toplevel_window,values=self.ex_list, state="readonly")
-            self.exercise_listbox.grid(row=0, column=0, padx=10, pady=10)
+            self.exercise_label = ctk.CTkLabel(self.toplevel_window, text="Select Exercise:", font=("Arial", 14))
+            self.exercise_label.grid(row=0, column=0, padx=10, pady=5)
+            
+            self.exercise_listbox = ctk.CTkComboBox(self.toplevel_window, values=self.ex_list, state="readonly")
+            self.exercise_listbox.grid(row=0, column=1, padx=10, pady=10)
+            
+            self.from_date_label = ctk.CTkLabel(self.toplevel_window, text="From Date:")
+            self.from_date_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")
+            self.from_date_entry = DateEntry(self.toplevel_window, width=20, font=("Arial,13"), date_pattern="DD/MM/YYYY", background='E0E6E9', foreground='white', borderwidth=2)
+            self.from_date_entry.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+
+            self.to_date_label = ctk.CTkLabel(self.toplevel_window, text="To Date:")
+            self.to_date_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
+            self.to_date_entry = DateEntry(self.toplevel_window, width=20, font=("Arial,13"), date_pattern="DD/MM/YYYY", background='E0E6E9', foreground='white', borderwidth=2)
+            self.to_date_entry.grid(row=2, column=1, padx=10, pady=5, sticky="w")
+
             self.confirm_button = ctk.CTkButton(self.toplevel_window, text="Confirm", command=self.confirm_selection)
-            self.confirm_button.grid(row=1, column=0, padx=10, pady=10)
+            self.confirm_button.grid(row=3, column=0, padx=10, pady=10,columnspan = 2)
         else:
             self.toplevel_window.focus()
 
     def confirm_selection(self):
         self.selected_exercise = self.exercise_listbox.get()
         print(f"Selected exercise: {self.selected_exercise}")
+        self.selected_exercise_label.configure(text=f"Selected Exercise: {self.selected_exercise}\nFrom: {self.from_date_entry.get()}\nTo: {self.to_date_entry.get()}")
+        self.from_date = self.from_date_entry.get()
+        self.to_date = self.to_date_entry.get()
         self.toplevel_window.destroy()
     def calculate_bmi(self):
         try:
@@ -207,6 +233,41 @@ class MainPage(ctk.CTk):
         self.trackerFrame.pack_forget()
         self.bmi_frame.pack_forget()
         self.stats_frame.pack(fill="both", expand=True)
+    def plot_graph(self):
+        if not self.selected_exercise:
+            print("No exercise selected")
+            return
+
+        from_date = datetime.datetime.strptime(self.from_date, "%d/%m/%Y")
+        to_date = datetime.datetime.strptime(self.to_date, "%d/%m/%Y")
+
+        dates = []
+        intensities = []
+
+        for tracker in self.data:
+            for exercise in tracker.exercises:
+                if exercise.name == self.selected_exercise:
+                    exercise_date = datetime.datetime.strptime(exercise.date, "%d/%m/%Y")
+                    if from_date <= exercise_date <= to_date:
+                        dates.append(exercise_date)
+                        intensities.append(exercise.get_intensity())
+
+        if dates and intensities:
+            fig, ax = plt.subplots(figsize=(10, 6))  # Adjust the figsize parameter to make the graph bigger
+            ax.plot(dates, intensities, marker='o')
+            ax.set_title(f"Intensity of {self.selected_exercise} Over Time")
+            ax.set_xlabel("Date")
+            ax.set_ylabel("Intensity")
+
+            for widget in self.graph_frame.winfo_children():
+                widget.destroy()
+
+            canvas = FigureCanvasTkAgg(fig, master=self.graph_frame)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill="both", expand=True)
+            plt.close(fig)
+        else:
+            print("No data available for the selected exercise and date range")
         
 class TrackerWindow(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
@@ -291,7 +352,6 @@ class TrackerWindow(ctk.CTkToplevel):
         sets = self.sets_entry.get()
         reps = self.reps_entry.get()
 
-        # Add new exercise to dropdown if it's not empty and not already in the list
         if self.new_exercise_entry.get() != "" and self.new_exercise_entry.get() not in list(self.exercise_dropdown.cget("values")):
             new_exercise = self.new_exercise_entry.get()
             current_values = list(self.exercise_dropdown.cget("values"))

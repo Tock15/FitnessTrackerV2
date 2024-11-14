@@ -32,7 +32,7 @@ class MainPage(ctk.CTk):
         self.title_label = ctk.CTkLabel(self.mainFrame, text="Fitness Tracker", font=("Arial", 36))
         self.title_label.grid(row=0, column=0, pady=100)
         # BMI Button
-        self.bmi_button = ctk.CTkButton(self.mainFrame, text="BMI Calculator")
+        self.bmi_button = ctk.CTkButton(self.mainFrame, text="BMI Calculator",command=self.show_bmi)
         self.bmi_button.grid(row=1, column=0, pady=10)
         # Tracker Button
         self.tracker_button = ctk.CTkButton(self.mainFrame, text="Tracker",command=self.show_tracker)
@@ -64,7 +64,46 @@ class MainPage(ctk.CTk):
         # Ensure the log_table_frame expands
         self.log_table_frame.grid_columnconfigure(1, weight=1)  
         self.update_log_table()
+
+        ################## BMI Frame ##################
+
+        self.bmi_frame = ctk.CTkFrame(self)
+        self.bmi_frame.grid_columnconfigure(0, weight=1)
+        self.bmi_frame.pack_forget()
+        # Title for BMI Frame
+        self.bmi_title_label = ctk.CTkLabel(self.bmi_frame, text="BMI Calculator", font=("Arial", 36))
+        self.bmi_title_label.grid(row=0, column=0,columnspan=2, pady=20)
+        # Back Button
+        self.bmi_back_button = ctk.CTkButton(self.bmi_frame, text="Back", command=self.show_main)
+        self.bmi_back_button.grid(row=1, column=0, sticky="w", padx=150, pady=(20,50))
+        # Height Entry
+        self.height_label = ctk.CTkLabel(self.bmi_frame, text="Height (cm):")
+        self.height_label.grid(row=2, column=0, padx=(200,20), pady=10, sticky="w")
+        self.height_entry = ctk.CTkEntry(self.bmi_frame)
+        self.height_entry.grid(row=2, column=1, padx=(20,200), pady=10,sticky= "e")
+        # Weight Entry
+        self.weight_label = ctk.CTkLabel(self.bmi_frame, text="Weight (kg):")
+        self.weight_label.grid(row=3, column=0, padx=(200,20), pady=10, sticky="w")
+        self.weight_entry = ctk.CTkEntry(self.bmi_frame)
+        self.weight_entry.grid(row=3, column=1, padx=(20,200), pady=10,sticky= "e")
+        # Calculate Button
+        self.calculate_button = ctk.CTkButton(self.bmi_frame, text="Calculate", command=self.calculate_bmi)
+        self.calculate_button.grid(row=4, column=0, columnspan=2, pady=20)
+        # Result Label
+        self.result_label = ctk.CTkLabel(self.bmi_frame, text="", font=("Arial", 24))
+        self.result_label.grid(row=5, column=0, columnspan=2, pady=20)
+
         self.mainloop()
+    def calculate_bmi(self):
+        try:
+            height = float(self.height_entry.get()) / 100  # Convert cm to meters
+            weight = float(self.weight_entry.get())
+            bmi = weight / (height ** 2)
+            self.result_label.configure(text=f"Your BMI is: {bmi:.2f}")
+        except ValueError:
+            self.result_label.configure(text="Please enter valid numbers.")
+
+
     def update_log_table(self):
         for widget in self.log_table_frame.winfo_children():
             widget.destroy()
@@ -92,6 +131,10 @@ class MainPage(ctk.CTk):
                 exercise_label.pack(pady=5)
         else:
             self.toplevel_window.focus()
+    def clear_bmi(self):
+        self.height_entry.delete(0, 'end')
+        self.weight_entry.delete(0, 'end')
+        self.result_label.configure(text="")
     def open_new_workout(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = TrackerWindow(self) 
@@ -100,10 +143,17 @@ class MainPage(ctk.CTk):
             self.toplevel_window.focus() 
     def show_tracker(self):
         self.mainFrame.pack_forget()
+        self.bmi_frame.pack_forget()
         self.trackerFrame.pack(fill="both", expand=True)
     def show_main(self):
         self.trackerFrame.pack_forget()
+        self.bmi_frame.pack_forget()
+        self.clear_bmi()
         self.mainFrame.pack(fill="both", expand=True)
+    def show_bmi(self):
+        self.mainFrame.pack_forget()
+        self.trackerFrame.pack_forget()
+        self.bmi_frame.pack(fill="both", expand=True)
         
 class TrackerWindow(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
@@ -128,7 +178,7 @@ class TrackerWindow(ctk.CTkToplevel):
         # Date picker
         self.date_label = ctk.CTkLabel(self.info_frame, text="Date:")
         self.date_label.grid(row=2, column=0, sticky="w", padx=10, pady=5)
-        self.date_entry = DateEntry(self.info_frame, width=20, font=("Arial,13"), background='E0E6E9', foreground='white', borderwidth=2)
+        self.date_entry = DateEntry(self.info_frame, width=20, font=("Arial,13"),date_pattern="DD/MM/YYYY", background='E0E6E9', foreground='white', borderwidth=2)
         self.date_entry.grid(row=2, column=1, padx=10, pady=5)
         # Next button 
         self.next_button = ctk.CTkButton(self.info_frame, text="Next", command=self.show_logger_frame)

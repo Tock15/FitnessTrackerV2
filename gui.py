@@ -3,9 +3,9 @@ from tkcalendar import DateEntry
 import pickle
 from exercise import Weightlifting, Cardio, Tracker
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import os
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import datetime
 
 

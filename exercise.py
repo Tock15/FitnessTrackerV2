@@ -16,6 +16,8 @@ class Weightlifting(Exercise):
         self.reps = reps
     def get_data(self):
         return [self.date,self.weight,self.sets,self.reps]
+    def get_intensity(self):
+        return self.weight * self.sets * self.reps
 
 class Cardio(Exercise):
     def __init__(self,date,name,time):

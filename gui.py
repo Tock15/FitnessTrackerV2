@@ -2,6 +2,8 @@ import customtkinter as ctk
 from tkcalendar import DateEntry
 import pickle
 from exercise import Weightlifting, Cardio, Tracker
+import matplotlib.pyplot as plt
+import numpy as np
 import os
 
 
@@ -38,7 +40,7 @@ class MainPage(ctk.CTk):
         self.tracker_button = ctk.CTkButton(self.mainFrame, text="Tracker",command=self.show_tracker)
         self.tracker_button.grid(row=2, column=0, pady=10)
         # Stats Button
-        self.stats_button = ctk.CTkButton(self.mainFrame, text="Stats")
+        self.stats_button = ctk.CTkButton(self.mainFrame, text="Stats",command=self.show_stats)
         self.stats_button.grid(row=3, column=0, pady=10)
 
         self.toplevel_window = None ## use this later for top level window
@@ -93,7 +95,52 @@ class MainPage(ctk.CTk):
         self.result_label = ctk.CTkLabel(self.bmi_frame, text="", font=("Arial", 24))
         self.result_label.grid(row=5, column=0, columnspan=2, pady=20)
 
+        ############### Stats Frame ################
+        self.stats_frame = ctk.CTkFrame(self)
+        self.stats_frame.grid_columnconfigure(0, weight=1)
+        self.stats_frame.pack_forget()
+        self.selected_exercise = None
+        # Title for Stats Frame
+        self.stats_title_label = ctk.CTkLabel(self.stats_frame, text="Stats", font=("Arial", 36))
+        self.stats_title_label.grid(row=0, column=0,columnspan=2, pady=20)
+        # Back Button
+        self.stats_back_button = ctk.CTkButton(self.stats_frame, text="Back", command=self.show_main)
+        self.stats_back_button.grid(row=1, column=0, sticky="w", padx=20, pady=10)
+        # Select exercise button
+        self.select_exercise_button = ctk.CTkButton(self.stats_frame, text="Select Exercise", command=self.select_exercise)
+        self.select_exercise_button.grid(row=1, column=1, padx=20, pady=10)
+        # Frame for graph
+        self.graph_frame = ctk.CTkFrame(self.stats_frame)
+        self.graph_frame.grid(row=2, column=0, columnspan=2, pady=20)
+
+        #self.fig, self.ax = plt.subplots()
+        
         self.mainloop()
+    def select_exercise(self):
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            self.toplevel_window = ctk.CTkToplevel(self)
+            self.toplevel_window.geometry("400x300")
+            self.toplevel_window.title("Select Exercise")
+            self.toplevel_window.grab_set()
+            if os.path.exists("comboboxlist.pkl"): 
+                with open("comboboxlist.pkl", "rb") as f:
+                    self.ex_list = pickle.load(f)
+                    f.close()
+            else:
+                self.ex_list = []
+
+            # Example content for the top level window
+            self.exercise_listbox = ctk.CTkComboBox(self.toplevel_window,values=self.ex_list, state="readonly")
+            self.exercise_listbox.grid(row=0, column=0, padx=10, pady=10)
+            self.confirm_button = ctk.CTkButton(self.toplevel_window, text="Confirm", command=self.confirm_selection)
+            self.confirm_button.grid(row=1, column=0, padx=10, pady=10)
+        else:
+            self.toplevel_window.focus()
+
+    def confirm_selection(self):
+        self.selected_exercise = self.exercise_listbox.get()
+        print(f"Selected exercise: {self.selected_exercise}")
+        self.toplevel_window.destroy()
     def calculate_bmi(self):
         try:
             height = float(self.height_entry.get()) / 100  # Convert cm to meters
@@ -148,12 +195,18 @@ class MainPage(ctk.CTk):
     def show_main(self):
         self.trackerFrame.pack_forget()
         self.bmi_frame.pack_forget()
+        self.stats_frame.pack_forget()
         self.clear_bmi()
         self.mainFrame.pack(fill="both", expand=True)
     def show_bmi(self):
         self.mainFrame.pack_forget()
         self.trackerFrame.pack_forget()
         self.bmi_frame.pack(fill="both", expand=True)
+    def show_stats(self):
+        self.mainFrame.pack_forget()
+        self.trackerFrame.pack_forget()
+        self.bmi_frame.pack_forget()
+        self.stats_frame.pack(fill="both", expand=True)
         
 class TrackerWindow(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):

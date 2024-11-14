@@ -2,6 +2,7 @@ import customtkinter as ctk
 from tkcalendar import DateEntry
 import pickle
 from exercise import Weightlifting, Cardio, Tracker
+import os
 
 
 ctk.set_default_color_theme("theme.json")
@@ -9,9 +10,18 @@ class MainPage(ctk.CTk):
     def __init__(self,*args,**kwargs):
         self.tracker=None
         self.data = []
+        if not os.path.exists("data.pkl"):
+            with open("data.pkl", "wb") as f:
+                pickle.dump(self.data, f)
+                f.close()
+        else:
+            with open("data.pkl", "rb") as f:
+                self.data = pickle.load(f)
+                f.close()
         super().__init__(*args,**kwargs)
         self.geometry("1000x600")
         self.title("Exercise Tracker")
+        
 
         ############### Main Frame ################
 
@@ -53,6 +63,7 @@ class MainPage(ctk.CTk):
         self.log_table_frame.grid(row=2, column=0, pady=20, padx=20, sticky="nsew")
         # Ensure the log_table_frame expands
         self.log_table_frame.grid_columnconfigure(1, weight=1)  
+        self.update_log_table()
         self.mainloop()
     def update_log_table(self):
         for widget in self.log_table_frame.winfo_children():
@@ -114,14 +125,12 @@ class TrackerWindow(ctk.CTkToplevel):
         self.workout_name_label.grid(row=1, column=0, sticky="w", padx=10, pady=5)
         self.workout_name_entry = ctk.CTkEntry(self.info_frame)
         self.workout_name_entry.grid(row=1, column=1, padx=10, pady=5)
-        
         # Date picker
         self.date_label = ctk.CTkLabel(self.info_frame, text="Date:")
         self.date_label.grid(row=2, column=0, sticky="w", padx=10, pady=5)
         self.date_entry = DateEntry(self.info_frame, width=20, font=("Arial,13"), background='E0E6E9', foreground='white', borderwidth=2)
         self.date_entry.grid(row=2, column=1, padx=10, pady=5)
-        
-        # Next button to proceed to logging frame
+        # Next button 
         self.next_button = ctk.CTkButton(self.info_frame, text="Next", command=self.show_logger_frame)
         self.next_button.grid(row=3, column=0, columnspan=2, pady=10)
 
@@ -129,15 +138,24 @@ class TrackerWindow(ctk.CTkToplevel):
         self.logger_frame = ctk.CTkFrame(self)
         self.logger_frame.pack_forget()
         self.logger_frame.grid_columnconfigure(0, weight=1)
-
+        self.ex_list = []
+        # Title Label
         self.label = ctk.CTkLabel(self.logger_frame, text="", font=("Arial", 24), pady=10)
         self.label.grid(row=0, column=0, columnspan=2)
-
         # Exercise selection
         self.exercise_label = ctk.CTkLabel(self.logger_frame, text="Exercise:")
         self.exercise_label.grid(row=1, column=0, sticky="w", padx=10, pady=5)
         # Dropdown for saved exercises
-        self.exercise_dropdown = ctk.CTkComboBox(self.logger_frame, values=["Bench Press"], state="readonly")
+        if not os.path.exists("comboboxlist.pkl"):
+            with open("comboboxlist.pkl", "wb") as f:
+                pickle.dump(["Bench Press"], f)
+                f.close()
+        else:
+            with open("comboboxlist.pkl", "rb") as f:
+                self.ex_list = pickle.load(f)
+                f.close()
+        
+        self.exercise_dropdown = ctk.CTkComboBox(self.logger_frame, values=self.ex_list, state="readonly")
         self.exercise_dropdown.set("Select exercise")  ## TODO Error handle when user does not select an exercise
         self.exercise_dropdown.grid(row=1, column=1, padx=10, pady=5)
         # Entry for new exercise
@@ -175,6 +193,9 @@ class TrackerWindow(ctk.CTkToplevel):
             new_exercise = self.new_exercise_entry.get()
             current_values = list(self.exercise_dropdown.cget("values"))
             current_values.append(new_exercise)
+            with open("comboboxlist.pkl", "wb") as f:
+                pickle.dump(current_values, f)
+                f.close()
             self.exercise_dropdown.configure(values=current_values)
 
         self.exercise_dropdown.set('')
@@ -190,9 +211,6 @@ class TrackerWindow(ctk.CTkToplevel):
         self.confirmation_label.grid(row=7, column=0, columnspan=2, pady=10)
         self.after(2000, self.confirmation_label.destroy)
 
-        # Save the workout data to a file (append mode)
-        # with open("workout_log.pkl", "ab") as f:
-        #     pickle.dump(workout_data, f)
     def show_logger_frame(self):
         name = self.workout_name_entry.get()
         date = self.date_entry.get()
@@ -203,6 +221,9 @@ class TrackerWindow(ctk.CTkToplevel):
     def finish_logging(self):
         self.master.data.append(self.master.tracker)
         self.master.tracker = None
+        with open("data.pkl", "wb") as f:
+            pickle.dump(self.master.data, f)
+            f.close()
         self.master.update_log_table()
         self.destroy()
 MainPage()

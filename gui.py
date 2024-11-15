@@ -1,12 +1,13 @@
 import customtkinter as ctk
 from tkcalendar import DateEntry
 import pickle
-from exercise import Weightlifting, Cardio, Tracker
+from exercise import Weightlifting, Tracker #,Cardio
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import os
 import datetime
+import matplotlib.dates as mdates
 
 
 ctk.set_default_color_theme("theme.json")
@@ -255,11 +256,12 @@ class MainPage(ctk.CTk):
                         intensities.append(exercise.get_intensity())
 
         if dates and intensities:
-            fig, ax = plt.subplots(figsize=(10, 6))  # Adjust the figsize parameter to make the graph bigger
+            fig, ax = plt.subplots(figsize=(10, 6)) 
             ax.plot(dates, intensities, marker='o')
             ax.set_title(f"Intensity of {self.selected_exercise} Over Time")
             ax.set_xlabel("Date")
             ax.set_ylabel("Intensity")
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%d/%m/%Y"))
 
             for widget in self.graph_frame.winfo_children():
                 widget.destroy()

@@ -238,7 +238,9 @@ class MainPage(ctk.CTk):
         self.stats_frame.pack(fill="both", expand=True)
     def plot_graph(self):
         if not self.selected_exercise:
-            print("No exercise selected")
+            self.error_label = ctk.CTkLabel(self.stats_frame, text="No exercise selected", text_color="red", font=("Arial", 14))
+            self.error_label.grid(row=7, column=0, columnspan=2, pady=10)
+            self.after(2000, self.error_label.destroy)
             return
 
         from_date = datetime.datetime.strptime(self.from_date, "%d/%m/%Y")

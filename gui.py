@@ -171,10 +171,12 @@ class MainPage(ctk.CTk):
         try:
             height = float(self.height_entry.get()) / 100  # Convert cm to meters
             weight = float(self.weight_entry.get())
+            if height <= 0 or weight <= 0:
+                raise ValueError("Height and weight must be positive numbers.")
             bmi = weight / (height ** 2)
             self.result_label.configure(text=f"Your BMI is: {bmi:.2f}")
         except ValueError:
-            self.result_label.configure(text="Please enter valid numbers.")
+            self.result_label.configure(text="Please enter valid positive numbers.")
 
 
     def update_log_table(self):
@@ -312,7 +314,8 @@ class TrackerWindow(ctk.CTkToplevel):
         # Dropdown for saved exercises
         if not os.path.exists("comboboxlist.pkl"):
             with open("comboboxlist.pkl", "wb") as f:
-                pickle.dump(["Bench Press"], f)
+                self.ex_list = ["Bench Press"]
+                pickle.dump(self.ex_list, f)
                 f.close()
         else:
             with open("comboboxlist.pkl", "rb") as f:
@@ -320,7 +323,7 @@ class TrackerWindow(ctk.CTkToplevel):
                 f.close()
         
         self.exercise_dropdown = ctk.CTkComboBox(self.logger_frame, values=self.ex_list, state="readonly")
-        self.exercise_dropdown.set("Select exercise")  ## TODO Error handle when user does not select an exercise
+        self.exercise_dropdown.set("Select exercise")  
         self.exercise_dropdown.grid(row=1, column=1, padx=10, pady=5)
         # Entry for new exercise
         self.new_exercise_entry = ctk.CTkEntry(self.logger_frame, placeholder_text="Or enter new")
@@ -344,15 +347,15 @@ class TrackerWindow(ctk.CTkToplevel):
         self.finish_button = ctk.CTkButton(self.logger_frame, text="Complete", command=self.finish_logging)
         self.finish_button.grid(row=6, column=1, pady=10)
 
-    def log_workout(self):
-        # Get data from entries
+    def log_workout(self): #TODO Don't allow user to use combo box and new entry at the same time
         date = self.date_entry.get()
+        if self.new_exercise_entry.get() == "" and self.exercise_dropdown.get() == "Select exercise":
+            self.confirmation_label = ctk.CTkLabel(self.logger_frame, text="Please select or enter an exercise.", text_color="red")
+            self.confirmation_label.grid(row=7, column=0, columnspan=2, pady=10)
+            self.after(2000, self.confirmation_label.destroy)
+            return
         exercise = self.exercise_dropdown.get() if self.new_exercise_entry.get() == "" else self.new_exercise_entry.get()
-        weight = self.weight_entry.get()
-        sets = self.sets_entry.get()
-        reps = self.reps_entry.get()
-
-        if self.new_exercise_entry.get() != "" and self.new_exercise_entry.get() not in list(self.exercise_dropdown.cget("values")):
+        if   self.new_exercise_entry.get() != "" and self.new_exercise_entry.get() not in list(self.exercise_dropdown.cget("values")):
             new_exercise = self.new_exercise_entry.get()
             current_values = list(self.exercise_dropdown.cget("values"))
             current_values.append(new_exercise)
@@ -360,6 +363,18 @@ class TrackerWindow(ctk.CTkToplevel):
                 pickle.dump(current_values, f)
                 f.close()
             self.exercise_dropdown.configure(values=current_values)
+        try:
+            weight = float(self.weight_entry.get())
+            sets = int(self.sets_entry.get())
+            reps = int(self.reps_entry.get())
+            
+            if weight <= 0 or sets <= 0 or reps <= 0:
+                raise ValueError("Weight, sets, and reps must be positive numbers.")
+        except ValueError:
+            self.confirmation_label = ctk.CTkLabel(self.logger_frame, text="Please enter valid positive numbers.", text_color="red")
+            self.confirmation_label.grid(row=7, column=0, columnspan=2, pady=10)
+            self.after(2000, self.confirmation_label.destroy)
+            return
 
         self.exercise_dropdown.set('')
         self.new_exercise_entry.delete(0, 'end')

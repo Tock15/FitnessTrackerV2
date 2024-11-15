@@ -25,6 +25,8 @@ class Cardio(Exercise):
         self.time = time
     def get_data(self):
         return [self.date,self.name,self.time]
+    def get_intensity(self):
+        return float(self.time)  
     
 class Tracker:
     def __init__(self,name,date):

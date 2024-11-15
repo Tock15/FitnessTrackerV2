@@ -390,7 +390,7 @@ class TrackerWindow(ctk.CTkToplevel):
 
         temp = Weightlifting(date, exercise, weight, sets, reps)
         self.master.tracker.add_exercise(temp)
-        print(self.master.tracker.logDict) # TODO remove this later when done testing
+        print(self.master.tracker.logDict) # remove this later when done testing
         self.confirmation_label = ctk.CTkLabel(self.logger_frame, text="Logged successfully!", text_color="green")
         self.confirmation_label.grid(row=7, column=0, columnspan=2, pady=10)
         self.after(2000, self.confirmation_label.destroy)

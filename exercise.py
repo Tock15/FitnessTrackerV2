@@ -19,14 +19,14 @@ class Weightlifting(Exercise):
     def get_intensity(self):
         return float(self.weight) * float(self.sets) * float(self.reps)
 
-class Cardio(Exercise):
-    def __init__(self,date,name,time):
-        super().__init__(date,name)
-        self.time = time
-    def get_data(self):
-        return [self.date,self.name,self.time]
-    def get_intensity(self):
-        return float(self.time)  
+# class Cardio(Exercise):
+#     def __init__(self,date,name,time):
+#         super().__init__(date,name)
+#         self.time = time
+#     def get_data(self):
+#         return [self.date,self.name,self.time]
+#     def get_intensity(self):
+#         return float(self.time)  
     
 class Tracker:
     def __init__(self,name,date):

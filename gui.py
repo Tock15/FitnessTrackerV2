@@ -272,8 +272,6 @@ class MainPage(ctk.CTk):
             canvas.draw()
             canvas.get_tk_widget().pack(fill="both", expand=True)
             plt.close(fig)
-        else:
-            print("No data available for the selected exercise and date range")
         
 class TrackerWindow(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):

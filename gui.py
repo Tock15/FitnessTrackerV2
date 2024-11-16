@@ -365,7 +365,7 @@ class TrackerWindow(ctk.CTkToplevel):
             self.after(2000, self.confirmation_label.destroy)
             return
         if self.new_exercise_entry.get() != "" and self.exercise_dropdown.get() != "None":
-            self.confirmation_label = ctk.CTkLabel(self.logger_frame, text="Please use only one input method.", text_color="red")
+            self.confirmation_label = ctk.CTkLabel(self.logger_frame, text="Please use only one exercise input method.", text_color="red")
             print(self.exercise_dropdown.get())
             self.confirmation_label.grid(row=7, column=0, columnspan=2, pady=10)
             self.after(2000, self.confirmation_label.destroy)
@@ -406,7 +406,15 @@ class TrackerWindow(ctk.CTkToplevel):
         self.after(2000, self.confirmation_label.destroy)
 
     def show_logger_frame(self):
-        name = self.workout_name_entry.get()
+        try:
+            name = self.workout_name_entry.get()
+            if name == "":
+                raise ValueError("Workout name cannot be empty.")
+        except ValueError as e:
+            self.confirmation_label = ctk.CTkLabel(self.info_frame, text=str(e), text_color="red")
+            self.confirmation_label.grid(row=4, column=0, columnspan=2, pady=10)
+            self.after(2000, self.confirmation_label.destroy)
+            return
         date = self.date_entry.get()
         self.label.configure(text=name)
         self.master.tracker = Tracker(name, date)  # IMPORTANT - create a new tracker object here

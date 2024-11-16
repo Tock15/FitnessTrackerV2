@@ -193,8 +193,16 @@ class MainPage(ctk.CTk):
 
                 view_button = ctk.CTkButton(self.log_table_frame, text="View", command=lambda t=tracker: self.view_workout(t))
                 view_button.grid(row=i, column=2, padx=10, pady=5, sticky="e")
+                delete_button = ctk.CTkButton(self.log_table_frame, text="Delete", command=lambda t=tracker: self.delete_workout(t))
+                delete_button.grid(row=i, column=3, padx=10, pady=5, sticky="ew")
         self.log_table_frame.update_idletasks()
 
+    def delete_workout(self, tracker):
+        self.data.remove(tracker)
+        self.update_log_table()
+        with open("data.pkl", "wb") as f:
+            pickle.dump(self.data, f)
+            f.close()
     def view_workout(self, tracker):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = ctk.CTkToplevel(self)
@@ -203,7 +211,7 @@ class MainPage(ctk.CTk):
             self.toplevel_window.grab_set()  
 
             for i, exercise in enumerate(tracker.exercises):
-                exercise_label = ctk.CTkLabel(self.toplevel_window, text=f"{exercise.name}: {exercise.sets} sets x {exercise.reps} reps", font=("Arial", 14))
+                exercise_label = ctk.CTkLabel(self.toplevel_window, text=f"{exercise.name}: {exercise.weight}kg: {exercise.sets} sets x {exercise.reps} reps", font=("Arial", 14))
                 exercise_label.pack(pady=5)
         else:
             self.toplevel_window.focus()

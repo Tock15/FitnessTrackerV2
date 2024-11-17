@@ -163,7 +163,6 @@ class MainPage(ctk.CTk):
 
     def confirm_selection(self):
         self.selected_exercise = self.exercise_listbox.get()
-        print(f"Selected exercise: {self.selected_exercise}")
         self.selected_exercise_label.configure(text=f"Selected Exercise: {self.selected_exercise}\nFrom: {self.from_date_entry.get()}\nTo: {self.to_date_entry.get()}")
         self.from_date = self.from_date_entry.get()
         self.to_date = self.to_date_entry.get()
@@ -366,7 +365,6 @@ class TrackerWindow(ctk.CTkToplevel):
             return
         if self.new_exercise_entry.get() != "" and self.exercise_dropdown.get() != "None":
             self.confirmation_label = ctk.CTkLabel(self.logger_frame, text="Please use only one exercise input method.", text_color="red")
-            print(self.exercise_dropdown.get())
             self.confirmation_label.grid(row=7, column=0, columnspan=2, pady=10)
             self.after(2000, self.confirmation_label.destroy)
             return
@@ -400,7 +398,6 @@ class TrackerWindow(ctk.CTkToplevel):
 
         temp = Weightlifting(date, exercise, weight, sets, reps)
         self.master.tracker.add_exercise(temp)
-        print(self.master.tracker.logDict) # remove this later when done testing
         self.confirmation_label = ctk.CTkLabel(self.logger_frame, text="Logged successfully!", text_color="green")
         self.confirmation_label.grid(row=7, column=0, columnspan=2, pady=10)
         self.after(2000, self.confirmation_label.destroy)

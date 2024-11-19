@@ -11,7 +11,7 @@ import matplotlib.dates as mdates
 
 
 ctk.set_default_color_theme("theme.json")
-ctk.set_appearance_mode("light")
+
 class MainPage(ctk.CTk):
     def __init__(self,*args,**kwargs):
         self.tracker=None

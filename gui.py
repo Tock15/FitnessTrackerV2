@@ -11,6 +11,7 @@ import matplotlib.dates as mdates
 
 
 ctk.set_default_color_theme("theme.json")
+ctk.set_appearance_mode("light")
 class MainPage(ctk.CTk):
     def __init__(self,*args,**kwargs):
         self.tracker=None
@@ -114,11 +115,9 @@ class MainPage(ctk.CTk):
         # Select exercise button
         self.select_exercise_button = ctk.CTkButton(self.stats_frame, text="Select Exercise", command=self.select_exercise)
         self.select_exercise_button.grid(row=1, column=1, padx=20, pady=10)
-
         # Frame for graph
         self.graph_frame = ctk.CTkFrame(self.stats_frame,fg_color="lightgrey")
         self.graph_frame.grid(row=5, column=0, columnspan=2, pady=20,sticky="ns")
-
         self.plot_button = ctk.CTkButton(self.stats_frame, text="Plot Graph", command=self.plot_graph)
         self.plot_button.grid(row=6, column=0, columnspan=2, pady=10)
         # Selected Exercise Label
